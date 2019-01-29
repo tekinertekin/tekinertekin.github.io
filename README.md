@@ -1,3 +1,1 @@
 # tekinertekin.github.io
-    
-  a

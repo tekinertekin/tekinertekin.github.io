@@ -188,6 +188,7 @@
 			attribute vec2 aTextureCoord;
 			
 			uniform vec3 uLightPosition;
+			uniform vec3 uLightDir;
 
 			uniform mat4 uMVMatrix;
 			uniform mat4 uPMatrix;
@@ -196,6 +197,7 @@
 			varying vec2 vTextureCoord;
 			varying vec3 n, v;
 			varying vec3 lightDirection;
+			varying vec3 lightDir1;
 			
 			
 			void main(void){
@@ -208,11 +210,20 @@
 
 				vTextureCoord = aTextureCoord;
 				
-				gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-				//uLightPosition = uPMatrix * uMVMatrix * vec4(uLightPosition, 1.0);
+				gl_Position = uPMatrix * (uMVMatrix * vec4(aVertexPosition, 1.0));
 				
-				lightDirection = aVertexPosition - uLightPosition;
-				//lightDirection = ((uPMatrix * uMVMatrix * vec4(uLightPosition, 1.0)) - gl_Position).xyz;
+				/*if((uMVMatrix * vec4(aVertexPosition, 1.0)).x > 0.0)*/
+					lightDirection = (
+									uMVITMatrix * 
+									-vec4(uLightPosition - (uMVMatrix * vec4(aVertexPosition, 1.0)).xyz, 0.0)
+								 ).xyz;
+				/*else
+					lightDirection = (
+									uMVITMatrix * 
+									vec4(uLightPosition - (uMVMatrix * vec4(aVertexPosition, 1.0)).xyz, 0.0)
+								 ).xyz;*/
+				
+				lightDir1 = uLightDir;
 				
 			}
 
@@ -239,6 +250,8 @@
 
 		varying vec2 vTextureCoord;
 		varying vec3 lightDirection;
+		
+		varying vec3 lightDir1;
 
 		//The texture
 		uniform sampler2D u_texture;
@@ -252,12 +265,24 @@
 			vec3 l = normalize(lightDirection);
 			vec3 n2 = normalize(n);
 			vec3 v2 = normalize(v);
+			
+
 
 			float nl = dot(n2,l);
 			vec3 r = normalize(2.0*nl*n2-l);
-
+			
 			vec4 diffuse = max(nl,0.0)*uDiffuseProduct;
 			vec4 specular = pow(max(dot(r,v2),0.0),uShininess)*uSpecularProduct;
+			if(acos(dot(l,lightDir1)/(length(l)*length(lightDir1))) < 1.0)
+			{
+				diffuse = max(nl,0.0)*uDiffuseProduct;
+				specular = pow(max(dot(r,v2),0.0),uShininess)*uSpecularProduct;
+			}
+			else
+			{
+				diffuse = min(nl,0.0)*uDiffuseProduct;
+				specular = pow(min(dot(r,v2),0.0),uShininess)*uSpecularProduct;				
+			}
 			vec4 ambient = uAmbientProduct;
 
 			vec4 fColor = diffuse + ambient + specular;

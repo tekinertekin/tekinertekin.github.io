@@ -3,9 +3,10 @@ function Light(lightType = LightType.Directional){
     this.type = lightType;
 
     if(this.type == LightType.Directional || this.type == LightType.Spot){
-        this.direction = [1, 0, 0];
+        this.direction = [0, -1, 0];
     }
     else if(this.type == LightType.Point || this.type == LightType.Spot){
+		this.direction = [0, -1, 0];
         this.position = [0, 10, -6.5];
     }
 
@@ -26,32 +27,15 @@ function Light(lightType = LightType.Directional){
         }
         else if(this.type == LightType.Point || this.type == LightType.Spot)
 		{
-			var fenerposition = window.fener.calculateModelMatrix();
-			//console.log(fenerposition);
-			//var direction4 = [fenerposition[12], -fenerposition[13], fenerposition[14], 1];
-            //direction4 = mat4.multiply(direction4, camera.viewMatrix, direction4);
-			fenerposition = mat4.multiply(fenerposition, camera.viewMatrix, fenerposition);
-			fenerposition = mat4.multiply(fenerposition, window.mainCamera.projectionMatrix, fenerposition);
-            var direction3 = [fenerposition[12],fenerposition[13],fenerposition[14]];
+			var pos = [0,0,0,1];
+			var modelMatrix = window.fener.calculateModelMatrix();
+			var mvMatrix = mat4.create();
+            mvMatrix = mat4.multiply(mvMatrix, camera.viewMatrix, modelMatrix);
+            pos = mat4.multiply(pos,mvMatrix,pos);
+			var direction3 = [pos[0],pos[1],pos[2]];
             program.setUniform3fv("uLightPosition", direction3);
-			
-			
-			//gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-			//var fenerposition = window.fener.calculateModelMatrix();
-			//console.log(direction4);
-			//var direction4 = [fenerposition[12], fenerposition[13], fenerposition[14], 0];
-			//console.log(direction4);
-			//var direction4 = [-this.position[0], -this.position[1], -this.position[2], 1];
-			//console.log(direction4);
-			//direction4 = mat4.multiply(direction4, camera.viewMatrix, direction4);
-			
-			//mat4.multiply(direction4, window.mainCamera.projectionMatrix, direction4);
-			//console.log(direction4);
-            //mat4.multiply(direction4, camera.viewMatrix, direction4);
-			//
-			
-            //var direction3 = [direction4[0],direction4[1],-direction4[2]];
-			//program.setUniform3fv("uLightPosition", direction3);
+			program.setUniform3fv("uLightDir", this.direction);
+
         }
     }
 }

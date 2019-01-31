@@ -188,10 +188,14 @@ window.init = function(){
     var slider1 = createSlider("Pos X : ", 0, -7, 7, function(){
 
         window.adam.localPosition[0] = this.value;
+		window.mainCamera.position[0] = parseInt(this.value);
+		window.mainCamera.lookAt[0] = parseInt(this.value);
     });
 
     var dirXSlider = createSlider("Pos Z : ", 0, -7, 7, function(){
         window.adam.localPosition[2] = parseInt(this.value) + 8;
+		window.mainCamera.position[2] = parseInt(this.value);
+		window.mainCamera.lookAt[2] = parseInt(this.value) + 1;
     });
 
     var dirYSlider = createSlider("Rotate X : ", 0, -45, 45, function(){
